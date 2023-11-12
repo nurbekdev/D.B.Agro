@@ -1,56 +1,25 @@
-/*********
-  Rui Santos
-  Complete project details at https://randomnerdtutorials.com  
-*********/
-
-// Import required libraries
+// Kutubxonalarni yuklab olamiz
 #include "WiFi.h"
 #include "ESPAsyncWebServer.h"
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 #include <LiquidCrystal_I2C.h>
 
+
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 
-// Replace with your network credentials
-const char* ssid = "Avazbek";
-const char* password = "19990206";
+// WI FI SSID va Paroli
+const char* ssid = "SSID";
+const char* password = "Parol";
 
-#define DHTPIN 15     // Digital pin connected to the DHT sensor
-
-// Uncomment the type of sensor in use:
-//#define DHTTYPE    DHT11     // DHT 11
-#define DHTTYPE    DHT11     // DHT 22 (AM2302)
-//#define DHTTYPE    DHT21     // DHT 21 (AM2301)
-
+#define DHTPIN 15     // DHT PIN
+#define DHTTYPE    DHT11     // DHT TYPE
 DHT dht(DHTPIN, DHTTYPE);
 
-
-
-
-// Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
-
-
-
-// String readFOTOREZISTOR(){
-//   int FOTOREZISTOR= digitalRead(35);   
-//      // tuproq namligi sensori
-//   if (isnan(FOTOREZISTOR)) {    
-//     Serial.println("FOTOREZISTOR ERROR!");
-//     return "--";
-//   }
-//   else {
-//     Serial.println(FOTOREZISTOR);
-//     return String(FOTOREZISTOR);
-//   }
-// }
-
-
 String readTuproqNamlik(){
   int namlik= analogRead(32);   
-     // tuproq namligi sensori
   namlik = map(namlik, 1060, 2800, 100, 0);
   if(namlik>100){
     namlik = 100;
@@ -59,7 +28,7 @@ String readTuproqNamlik(){
     namlik=0;
   }   
   if (isnan(namlik)) {    
-    Serial.println("Namlik ERROR!");
+    Serial.println("Namlik sensor Xatosi!");
     return "--";
   }
   else {
@@ -70,12 +39,7 @@ String readTuproqNamlik(){
 
 
 String readDHTTemperature() {
-  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-  // Read temperature as Celsius (the default)
   float t = dht.readTemperature();
-  // Read temperature as Fahrenheit (isFahrenheit = true)
-  //float t = dht.readTemperature(true);
-  // Check if any reads failed and exit early (to try again).
   if (isnan(t)) {    
     Serial.println("Failed to read from DHT sensor!");
     return "--";
@@ -87,7 +51,6 @@ String readDHTTemperature() {
 }
 
 String readDHTHumidity() {
-  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
   float h = dht.readHumidity();
   if (isnan(h)) {
     Serial.println("Failed to read from DHT sensor!");
@@ -98,11 +61,6 @@ String readDHTHumidity() {
     return String(h);
   }
 }
-
-
-
-
-
 const char index_html[] PROGMEM = R"rawliteral(
 <!DOCTYPE HTML><html>
 <head>
@@ -199,9 +157,7 @@ setInterval(function ( ) {
 </script>
 </html>)rawliteral";
 
-// Replaces placeholder with DHT values
 String processor(const String& var){
-  //Serial.println(var);
   if(var == "TEMPERATURE"){
     return readDHTTemperature();
   }
@@ -211,20 +167,16 @@ String processor(const String& var){
   else if(var == "TUPROQNAMLIK"){
     return readTuproqNamlik();
   }
-
   return String();
 }
 
 
 
 void setup(){
-  // Serial port for debugging purposes
+  // Serial Portga ulanamiz
   Serial.begin(115200);
   lcd.init();
   lcd.backlight();
-  
-
-
   pinMode(35,INPUT);
   pinMode(32,INPUT);
   pinMode(27, OUTPUT);
@@ -255,11 +207,6 @@ void setup(){
   server.on("/tuproqnamlik", HTTP_GET, [](AsyncWebServerRequest *request){
     request->send_P(200, "text/plain", readTuproqNamlik().c_str());
   });
-  // server.on("/fotorezistor", HTTP_GET, [](AsyncWebServerRequest *request){
-  //   request->send_P(200, "text/plain", readFOTOREZISTOR().c_str());
-  // });
-
-  // Start server
   server.begin();
 }
  
@@ -287,7 +234,7 @@ void loop(){
     lcd.print(h);
     lcd.print("%           ");
     
-    lcd.setCursor(0,1);   //Set cursor to character 2 on line 0
+    lcd.setCursor(0,1);  
     lcd.print("IP: ");
     lcd.print(WiFi.localIP());
 
@@ -296,17 +243,16 @@ void loop(){
   }
   
   if((rStepLcd - lStepLcd) % 2 == 0 && rStepLcd != lStepLcd){
-    lcd.setCursor(0,0);   //Set cursor to character 2 on line 0
+    lcd.setCursor(0,0);   
     lcd.print("Harorat: ");
     lcd.print(t);
     lcd.print("C          ");
     
-    lcd.setCursor(0,1);   //Set cursor to character 2 on line 0
+    lcd.setCursor(0,1); 
     lcd.print("Namlik T. : ");
     lcd.print(namlik);
     lcd.print("%           ");
     lStepLcd = rStepLcd;
     Serial.println("222");
   }
-
 }
