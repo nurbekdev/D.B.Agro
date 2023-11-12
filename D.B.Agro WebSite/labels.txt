@@ -1,0 +1,4 @@
+0 Olma qoradog'lari
+1 Sog'lom
+2 Olma chirishi
+3 Olma zangi
